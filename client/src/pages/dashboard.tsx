@@ -8,6 +8,7 @@ import { LogsPanel } from '@/components/LogsPanel';
 import { Button } from '@/components/ui/button';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { Bot as BotIcon, Plus, Square } from 'lucide-react';
 
 export default function Dashboard() {
   const [selectedBot, setSelectedBot] = useState<Bot | null>(null);
@@ -134,8 +135,8 @@ export default function Dashboard() {
       <header className="bg-card border-b border-border p-4" data-testid="header">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-bold text-primary" data-testid="title">
-              <i className="fas fa-robot mr-2"></i>
+            <h1 className="text-2xl font-bold text-primary flex items-center gap-2" data-testid="title">
+              <BotIcon className="w-6 h-6" />
               Mineflayer Bot Manager
             </h1>
             <div className="flex items-center space-x-2 text-sm text-muted-foreground">
@@ -148,18 +149,19 @@ export default function Dashboard() {
             <div className="flex items-center space-x-2">
               <Button 
                 onClick={handleSpawnAllBots}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-2"
                 data-testid="button-spawn-all"
               >
-                <i className="fas fa-plus mr-2"></i>
+                <Plus className="w-4 h-4" />
                 Spawn All Bots
               </Button>
               <Button 
                 onClick={handleStopAllBots}
                 variant="destructive"
+                className="flex items-center gap-2"
                 data-testid="button-stop-all"
               >
-                <i className="fas fa-stop mr-2"></i>
+                <Square className="w-4 h-4" />
                 Stop All
               </Button>
             </div>

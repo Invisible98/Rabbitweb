@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
+import { User, Sword, Square, Navigation, Shuffle, Send, Play, Brain } from 'lucide-react';
 
 interface ControlPanelProps {
   bots: Bot[];
@@ -145,10 +146,10 @@ export function ControlPanel({ bots, selectedBot, lastAiResponse }: ControlPanel
               />
               <Button 
                 onClick={handleGlobalFollow}
-                className="bg-green-600 hover:bg-green-700 text-white"
+                className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1"
                 data-testid="button-global-follow"
               >
-                <i className="fas fa-walking mr-1"></i>
+                <User className="w-4 h-4" />
                 Follow
               </Button>
             </div>
@@ -166,10 +167,10 @@ export function ControlPanel({ bots, selectedBot, lastAiResponse }: ControlPanel
               />
               <Button 
                 onClick={handleGlobalAttack}
-                className="bg-red-600 hover:bg-red-700 text-white"
+                className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-1"
                 data-testid="button-global-attack"
               >
-                <i className="fas fa-sword mr-1"></i>
+                <Sword className="w-4 h-4" />
                 Attack
               </Button>
             </div>
@@ -179,18 +180,18 @@ export function ControlPanel({ bots, selectedBot, lastAiResponse }: ControlPanel
         <div className="grid grid-cols-3 gap-2 mb-4">
           <Button 
             onClick={handleGlobalStop}
-            className="bg-yellow-600 hover:bg-yellow-700 text-white"
+            className="bg-yellow-600 hover:bg-yellow-700 text-white flex items-center gap-1"
             data-testid="button-global-stop"
           >
-            <i className="fas fa-stop mr-1"></i>
+            <Square className="w-4 h-4" />
             Stop Attack
           </Button>
           <Button 
             onClick={handleGlobalTeleport}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1"
             data-testid="button-global-teleport"
           >
-            <i className="fas fa-location-arrow mr-1"></i>
+            <Navigation className="w-4 h-4" />
             TP to Rabbit
           </Button>
           <Button 
@@ -199,10 +200,10 @@ export function ControlPanel({ bots, selectedBot, lastAiResponse }: ControlPanel
                 executeIndividualCommand(bot.id, '/anti-afk');
               });
             }}
-            className="bg-purple-600 hover:bg-purple-700 text-white"
+            className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-1"
             data-testid="button-global-anti-afk"
           >
-            <i className="fas fa-random mr-1"></i>
+            <Shuffle className="w-4 h-4" />
             Toggle Anti-AFK
           </Button>
         </div>
@@ -220,10 +221,10 @@ export function ControlPanel({ bots, selectedBot, lastAiResponse }: ControlPanel
             />
             <Button 
               onClick={handleSendGlobalCommand}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-1"
               data-testid="button-send-global-command"
             >
-              <i className="fas fa-paper-plane mr-1"></i>
+              <Send className="w-4 h-4" />
               Send
             </Button>
           </div>
@@ -254,19 +255,19 @@ export function ControlPanel({ bots, selectedBot, lastAiResponse }: ControlPanel
           <Button 
             onClick={handleIndividualConnect}
             disabled={!selectedBotId}
-            className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50"
+            className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 flex items-center gap-1"
             data-testid="button-individual-connect"
           >
-            <i className="fas fa-play mr-1"></i>
+            <Play className="w-4 h-4" />
             Connect
           </Button>
           <Button 
             onClick={handleIndividualDisconnect}
             disabled={!selectedBotId}
-            className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
+            className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 flex items-center gap-1"
             data-testid="button-individual-disconnect"
           >
-            <i className="fas fa-stop mr-1"></i>
+            <Square className="w-4 h-4" />
             Disconnect
           </Button>
         </div>
@@ -296,8 +297,8 @@ export function ControlPanel({ bots, selectedBot, lastAiResponse }: ControlPanel
 
       {/* OpenAI Chat Integration */}
       <div className="bg-card rounded-lg border border-border p-4">
-        <h3 className="text-lg font-semibold mb-4" data-testid="ai-integration-title">
-          <i className="fas fa-brain mr-2 text-green-500"></i>
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2" data-testid="ai-integration-title">
+          <Brain className="w-5 h-5 text-green-500" />
           AI Chat Integration
         </h3>
         

@@ -2,6 +2,7 @@ import { Bot, BotStatus, BotAction } from '@shared/schema';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
+import { RefreshCw } from 'lucide-react';
 
 interface BotListProps {
   bots: Bot[];
@@ -84,7 +85,7 @@ export function BotList({ bots, selectedBot, onSelectBot }: BotListProps) {
             onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/bots'] })}
             data-testid="button-refresh-bots"
           >
-            <i className="fas fa-refresh"></i>
+            <RefreshCw className="w-4 h-4" />
           </button>
           <div className="text-xs bg-muted px-2 py-1 rounded" data-testid="bot-total-count">
             {bots.length} Total

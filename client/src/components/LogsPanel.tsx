@@ -1,6 +1,7 @@
 import { LogEntry, LogLevel } from '@shared/schema';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { Download, Trash2 } from 'lucide-react';
 
 interface LogsPanelProps {
   logs: LogEntry[];
@@ -91,7 +92,7 @@ export function LogsPanel({ logs }: LogsPanelProps) {
             className="text-muted-foreground hover:text-foreground"
             data-testid="button-download-logs"
           >
-            <i className="fas fa-download"></i>
+            <Download className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
@@ -100,7 +101,7 @@ export function LogsPanel({ logs }: LogsPanelProps) {
             className="text-muted-foreground hover:text-foreground"
             data-testid="button-clear-logs"
           >
-            <i className="fas fa-trash"></i>
+            <Trash2 className="w-4 h-4" />
           </Button>
         </div>
       </div>
