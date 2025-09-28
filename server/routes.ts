@@ -83,7 +83,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const bots = await storage.getBots();
       res.json(bots);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -96,7 +96,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(bot);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -107,7 +107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const bots = await storage.getBots();
       res.json({ message: "Spawning all bots", bots });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -117,7 +117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await botManager.connectBot(req.params.id);
       res.json({ message: "Bot connection initiated" });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -127,7 +127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await botManager.disconnectBot(req.params.id);
       res.json({ message: "Bot disconnected" });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -146,7 +146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(400).json({ error: "Bot ID required for individual commands" });
       }
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -160,7 +160,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await botManager.followPlayer(req.params.id, target);
       res.json({ message: `Bot following ${target}` });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -181,7 +181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ message: `All bots following ${target}` });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -195,7 +195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await botManager.attackPlayer(req.params.id, target);
       res.json({ message: `Bot attacking ${target}` });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -216,7 +216,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ message: `All bots attacking ${target}` });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -226,7 +226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await botManager.stopAction(req.params.id);
       res.json({ message: "Bot action stopped" });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -242,7 +242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ message: "All bots stopped" });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -252,7 +252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await botManager.toggleAntiAfk(req.params.id);
       res.json({ message: "Anti-AFK toggled" });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -262,7 +262,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await botManager.executeGlobalCommand('/tp rabbit0009');
       res.json({ message: "All bots teleporting to rabbit0009" });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -273,7 +273,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const logs = await storage.getLogs(limit);
       res.json(logs);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -284,7 +284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const logs = await storage.getBotLogs(req.params.id, limit);
       res.json(logs);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -294,7 +294,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.clearLogs();
       res.json({ message: "Logs cleared" });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 

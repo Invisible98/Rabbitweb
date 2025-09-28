@@ -99,7 +99,7 @@ export class BotManager extends EventEmitter {
       this.setupBotEventHandlers(botId, bot);
       
     } catch (error) {
-      await this.addLog(botId, `Connection failed: ${error.message}`, LogLevel.ERROR);
+      await this.addLog(botId, `Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`, LogLevel.ERROR);
       await this.updateBotStatus(botId, BotStatus.OFFLINE, BotAction.DISCONNECTED);
       this.scheduleReconnect(botId);
     }
@@ -226,7 +226,7 @@ export class BotManager extends EventEmitter {
         await this.addLog(botId, `Sent chat: ${command}`, LogLevel.INFO);
       }
     } catch (error) {
-      await this.addLog(botId, `Command failed: ${error.message}`, LogLevel.ERROR);
+      await this.addLog(botId, `Command failed: ${error instanceof Error ? error.message : 'Unknown error'}`, LogLevel.ERROR);
     }
   }
 
@@ -255,16 +255,16 @@ export class BotManager extends EventEmitter {
       await this.updateBotStatus(botId, BotStatus.ONLINE, BotAction.FOLLOWING, playerName);
       
       const pathfinder = require('mineflayer-pathfinder');
-      if (!instance.bot.pathfinder) {
+      if (!(instance.bot as any).pathfinder) {
         instance.bot.loadPlugin(pathfinder.pathfinder);
       }
       
       const { GoalFollow } = pathfinder.goals;
-      instance.bot.pathfinder.setGoal(new GoalFollow(player.entity, 3), true);
+      (instance.bot as any).pathfinder.setGoal(new GoalFollow(player.entity, 3), true);
       
       await this.addLog(botId, `Started following ${playerName}`, LogLevel.SUCCESS);
     } catch (error) {
-      await this.addLog(botId, `Follow failed: ${error.message}`, LogLevel.ERROR);
+      await this.addLog(botId, `Follow failed: ${error instanceof Error ? error.message : 'Unknown error'}`, LogLevel.ERROR);
     }
   }
 
@@ -296,7 +296,7 @@ export class BotManager extends EventEmitter {
       
       await this.addLog(botId, `Started attacking ${playerName}`, LogLevel.WARNING);
     } catch (error) {
-      await this.addLog(botId, `Attack failed: ${error.message}`, LogLevel.ERROR);
+      await this.addLog(botId, `Attack failed: ${error instanceof Error ? error.message : 'Unknown error'}`, LogLevel.ERROR);
     }
   }
 
@@ -306,8 +306,8 @@ export class BotManager extends EventEmitter {
 
     try {
       // Stop pathfinding
-      if (instance.bot.pathfinder) {
-        instance.bot.pathfinder.setGoal(null);
+      if ((instance.bot as any).pathfinder) {
+        (instance.bot as any).pathfinder.setGoal(null);
       }
 
       // Stop attacking
@@ -319,7 +319,7 @@ export class BotManager extends EventEmitter {
       await this.updateBotStatus(botId, BotStatus.ONLINE, BotAction.IDLE);
       await this.addLog(botId, 'Stopped current action', LogLevel.INFO);
     } catch (error) {
-      await this.addLog(botId, `Stop action failed: ${error.message}`, LogLevel.ERROR);
+      await this.addLog(botId, `Stop action failed: ${error instanceof Error ? error.message : 'Unknown error'}`, LogLevel.ERROR);
     }
   }
 
