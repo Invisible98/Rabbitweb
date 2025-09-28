@@ -175,6 +175,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const bots = await storage.getBots();
       const onlineBots = bots.filter(bot => bot.status === 'online');
       
+      // Add global command log first
+      await storage.addLog({
+        botId: 'global',
+        botName: 'Global Command',
+        message: `Global follow command executed: targeting ${target}`,
+        level: 'info' as any
+      });
+      
       for (const bot of onlineBots) {
         await botManager.followPlayer(bot.id, target);
       }
@@ -210,6 +218,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const bots = await storage.getBots();
       const onlineBots = bots.filter(bot => bot.status === 'online');
       
+      // Add global command log first
+      await storage.addLog({
+        botId: 'global',
+        botName: 'Global Command',
+        message: `Global attack command executed: targeting ${target}`,
+        level: 'info' as any
+      });
+      
       for (const bot of onlineBots) {
         await botManager.attackPlayer(bot.id, target);
       }
@@ -236,6 +252,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const bots = await storage.getBots();
       const onlineBots = bots.filter(bot => bot.status === 'online');
       
+      // Add global command log first
+      await storage.addLog({
+        botId: 'global',
+        botName: 'Global Command',
+        message: 'Global stop command executed: stopping all bot actions',
+        level: 'info' as any
+      });
+      
       for (const bot of onlineBots) {
         await botManager.stopAction(bot.id);
       }
@@ -259,6 +283,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Global teleport
   app.post("/api/bots/teleport", async (req, res) => {
     try {
+      // Add global command log first
+      await storage.addLog({
+        botId: 'global',
+        botName: 'Global Command',
+        message: 'Global teleport command executed: teleporting to rabbit0009',
+        level: 'info' as any
+      });
+      
       await botManager.executeGlobalCommand('/tp rabbit0009');
       res.json({ message: "All bots teleporting to rabbit0009" });
     } catch (error) {

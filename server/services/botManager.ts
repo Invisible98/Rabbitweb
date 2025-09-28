@@ -273,31 +273,52 @@ export class BotManager extends EventEmitter {
     if (!instance?.bot) throw new Error('Bot not connected');
 
     try {
+      // Always update status to attacking, even if player not found
+      await this.updateBotStatus(botId, BotStatus.ONLINE, BotAction.ATTACKING, playerName);
+      
       const player = instance.bot.players[playerName];
       if (!player?.entity) {
-        await this.addLog(botId, `Player ${playerName} not found`, LogLevel.WARNING);
+        await this.addLog(botId, `Hunting ${playerName} (player not currently visible)`, LogLevel.WARNING);
+        
+        // Set up a hunting interval to look for the player
+        const huntInterval = setInterval(() => {
+          if (instance.bot) {
+            const foundPlayer = instance.bot.players[playerName];
+            if (foundPlayer?.entity) {
+              clearInterval(huntInterval);
+              this.startAttacking(botId, playerName, foundPlayer.entity);
+            }
+          }
+        }, 2000);
+        
+        // Store interval for cleanup
+        (instance as any).attackInterval = huntInterval;
         return;
       }
 
-      await this.updateBotStatus(botId, BotStatus.ONLINE, BotAction.ATTACKING, playerName);
-      
-      // Simple attack implementation
-      const attackInterval = setInterval(() => {
-        if (instance.bot && player.entity) {
-          const distance = instance.bot.entity.position.distanceTo(player.entity.position);
-          if (distance <= 4) {
-            instance.bot.attack(player.entity);
-          }
-        }
-      }, 500);
-
-      // Store interval for cleanup
-      (instance as any).attackInterval = attackInterval;
-      
+      this.startAttacking(botId, playerName, player.entity);
       await this.addLog(botId, `Started attacking ${playerName}`, LogLevel.WARNING);
     } catch (error) {
       await this.addLog(botId, `Attack failed: ${error instanceof Error ? error.message : 'Unknown error'}`, LogLevel.ERROR);
     }
+  }
+
+  private startAttacking(botId: string, playerName: string, playerEntity: any): void {
+    const instance = this.instances.get(botId);
+    if (!instance?.bot) return;
+
+    // Simple attack implementation
+    const attackInterval = setInterval(() => {
+      if (instance.bot && playerEntity) {
+        const distance = instance.bot.entity.position.distanceTo(playerEntity.position);
+        if (distance <= 4) {
+          instance.bot.attack(playerEntity);
+        }
+      }
+    }, 500);
+
+    // Store interval for cleanup
+    (instance as any).attackInterval = attackInterval;
   }
 
   async stopAction(botId: string): Promise<void> {
