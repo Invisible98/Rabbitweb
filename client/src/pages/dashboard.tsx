@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Bot, LogEntry } from '@shared/schema';
 import { useSocket } from '@/hooks/useSocket';
@@ -35,41 +35,45 @@ export default function Dashboard() {
 
   // Socket event handlers
   useEffect(() => {
-    socket.on('botConnected', (bot) => {
+    const handleBotConnected = (bot: Bot) => {
       queryClient.invalidateQueries({ queryKey: ['/api/bots'] });
       toast({
         title: "Bot Connected",
         description: `${bot.username} has connected to the server`,
       });
-    });
+    };
 
-    socket.on('botDisconnected', (bot) => {
+    const handleBotDisconnected = (bot: Bot) => {
       queryClient.invalidateQueries({ queryKey: ['/api/bots'] });
       toast({
         title: "Bot Disconnected", 
         description: `${bot.username} has disconnected`,
         variant: "destructive"
       });
-    });
+    };
 
-    socket.on('botUpdated', (bot) => {
+    const handleBotUpdated = (bot: Bot) => {
       queryClient.invalidateQueries({ queryKey: ['/api/bots'] });
-      if (selectedBot?.id === bot.id) {
-        setSelectedBot(bot);
-      }
-    });
+      setSelectedBot(current => current?.id === bot.id ? bot : current);
+    };
 
-    socket.on('newLog', (log) => {
+    const handleNewLog = (log: LogEntry) => {
       setLogs(prev => [log, ...prev].slice(0, 50)); // Keep only last 50 logs
-    });
+    };
 
-    socket.on('aiResponse', (data) => {
+    const handleAiResponse = (data: { response: string; originalMessage: string }) => {
       setLastAiResponse(data.response);
       toast({
         title: "AI Response",
         description: data.response,
       });
-    });
+    };
+
+    socket.on('botConnected', handleBotConnected);
+    socket.on('botDisconnected', handleBotDisconnected);
+    socket.on('botUpdated', handleBotUpdated);
+    socket.on('newLog', handleNewLog);
+    socket.on('aiResponse', handleAiResponse);
 
     return () => {
       socket.off('botConnected');
@@ -78,7 +82,7 @@ export default function Dashboard() {
       socket.off('newLog');
       socket.off('aiResponse');
     };
-  }, [socket, selectedBot, toast]);
+  }, [socket, toast]);
 
   const onlineCount = bots.filter(bot => bot.status === 'online').length;
   const totalCount = bots.length;
