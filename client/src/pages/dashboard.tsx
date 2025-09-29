@@ -20,13 +20,13 @@ export default function Dashboard() {
   // Fetch bots data
   const { data: bots = [], isLoading } = useQuery<Bot[]>({
     queryKey: ['/api/bots'],
-    refetchInterval: 5000 // Refetch every 5 seconds as backup
+    refetchInterval: 30000 // Refetch every 30 seconds as backup
   });
 
   // Fetch logs data
   const { data: initialLogs = [] } = useQuery<LogEntry[]>({
     queryKey: ['/api/logs'],
-    refetchInterval: 10000
+    refetchInterval: 60000
   });
 
   useEffect(() => {
@@ -135,25 +135,27 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <header className="bg-card border-b border-border p-4" data-testid="header">
+      {/* Enhanced Header */}
+      <header className="gradient-header border-b border-border/50 p-6 shadow-2xl" data-testid="header">
         <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-bold text-primary flex items-center gap-2" data-testid="title">
-              <BotIcon className="w-6 h-6" />
-              Mineflayer Bot Manager
+          <div className="flex items-center space-x-6">
+            <h1 className="text-3xl font-bold text-primary flex items-center gap-3" data-testid="title">
+              <BotIcon className="w-8 h-8 text-primary drop-shadow-lg" />
+              <span className="bg-gradient-to-r from-primary to-green-400 bg-clip-text text-transparent">
+                Mineflayer Bot Manager
+              </span>
             </h1>
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <span className={`w-2 h-2 rounded-full ${socket.isConnected ? 'bg-green-500' : 'bg-red-500'}`}></span>
-              <span data-testid="server-status">Server: tbcraft.cbu.net:25569</span>
+            <div className="flex items-center space-x-3 text-sm text-muted-foreground glass-effect px-4 py-2 rounded-full">
+              <span className={`status-dot ${socket.isConnected ? 'online' : 'offline'}`}></span>
+              <span data-testid="server-status" className="font-medium">Server: tbcraft.cbu.net:25569</span>
             </div>
           </div>
           
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-3">
               <Button 
                 onClick={handleSpawnAllBots}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-2"
+                className="minecraft-button bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-2 shadow-lg"
                 data-testid="button-spawn-all"
               >
                 <Plus className="w-4 h-4" />
@@ -162,7 +164,7 @@ export default function Dashboard() {
               <Button 
                 onClick={handleStopAllBots}
                 variant="destructive"
-                className="flex items-center gap-2"
+                className="minecraft-button flex items-center gap-2 shadow-lg"
                 data-testid="button-stop-all"
               >
                 <Square className="w-4 h-4" />
@@ -170,39 +172,47 @@ export default function Dashboard() {
               </Button>
             </div>
             
-            <div className="flex items-center space-x-2 text-sm">
-              <span className="text-muted-foreground">Status:</span>
-              <span className="text-green-500 font-medium" data-testid="bot-count">
-                {onlineCount}/{totalCount} Online
-              </span>
+            <div className="glass-effect px-4 py-2 rounded-lg">
+              <div className="flex items-center space-x-3 text-sm">
+                <span className="text-muted-foreground">Status:</span>
+                <span className="text-primary font-bold text-lg" data-testid="bot-count">
+                  {onlineCount}/{totalCount} Online
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="container mx-auto p-4 grid grid-cols-12 gap-6 h-[calc(100vh-88px)]">
+      {/* Enhanced Main Content */}
+      <div className="container mx-auto p-6 grid grid-cols-12 gap-8 h-[calc(100vh-120px)]">
         {/* Left Sidebar - Bot List */}
         <div className="col-span-4">
-          <BotList 
-            bots={bots}
-            selectedBot={selectedBot}
-            onSelectBot={setSelectedBot}
-          />
+          <div className="glass-effect rounded-xl h-full">
+            <BotList 
+              bots={bots}
+              selectedBot={selectedBot}
+              onSelectBot={setSelectedBot}
+            />
+          </div>
         </div>
 
         {/* Center - Control Panel */}
         <div className="col-span-5">
-          <ControlPanel 
-            bots={bots}
-            selectedBot={selectedBot}
-            lastAiResponse={lastAiResponse}
-          />
+          <div className="glass-effect rounded-xl h-full">
+            <ControlPanel 
+              bots={bots}
+              selectedBot={selectedBot}
+              lastAiResponse={lastAiResponse}
+            />
+          </div>
         </div>
 
         {/* Right Sidebar - Logs */}
         <div className="col-span-3">
-          <LogsPanel logs={logs} />
+          <div className="glass-effect rounded-xl h-full">
+            <LogsPanel logs={logs} />
+          </div>
         </div>
       </div>
     </div>

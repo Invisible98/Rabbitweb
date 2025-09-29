@@ -1,8 +1,12 @@
+import { useState } from 'react';
 import { Bot, BotStatus, BotAction } from '@shared/schema';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Plus, Dice6 } from 'lucide-react';
 
 interface BotListProps {
   bots: Bot[];
@@ -12,6 +16,9 @@ interface BotListProps {
 
 export function BotList({ bots, selectedBot, onSelectBot }: BotListProps) {
   const { toast } = useToast();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newBotName, setNewBotName] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
 
   const getStatusColor = (status: BotStatus) => {
     switch (status) {
@@ -52,6 +59,54 @@ export function BotList({ bots, selectedBot, onSelectBot }: BotListProps) {
     return `${minutes}m`;
   };
 
+  const generateRandomName = () => {
+    const prefixes = ['Craft', 'Mine', 'Build', 'Guard', 'Farm', 'Battle', 'Scout', 'Helper', 'Worker', 'Digger', 'Stone', 'Iron', 'Gold', 'Diamond', 'Emerald'];
+    const suffixes = ['Bot', 'Miner', 'Builder', 'Fighter', 'Collector', 'Explorer', 'Warrior', 'Helper', 'Craft', 'Master'];
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+    const number = Math.floor(Math.random() * 9000) + 1000;
+    setNewBotName(`${prefix}${suffix}_${number}`);
+  };
+
+  const handleCreateBot = async () => {
+    if (!newBotName.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Please enter a bot name',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const response = await fetch('/api/bots/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: newBotName.trim() })
+      });
+      
+      if (!response.ok) throw new Error('Failed to create bot');
+      
+      toast({
+        title: 'Bot Created',
+        description: `${newBotName} has been created successfully`,
+      });
+      
+      setNewBotName('');
+      setIsCreateModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['/api/bots'] });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to create bot',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   const handleBotAction = async (botId: string, action: 'connect' | 'disconnect') => {
     try {
       const response = await fetch(`/api/bots/${botId}/${action}`, {
@@ -76,18 +131,78 @@ export function BotList({ bots, selectedBot, onSelectBot }: BotListProps) {
   };
 
   return (
-    <div className="bg-card rounded-lg border border-border p-4 overflow-hidden flex flex-col h-full" data-testid="bot-list">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold" data-testid="bot-list-title">Bot Fleet</h2>
-        <div className="flex items-center space-x-2">
+    <div className="p-6 overflow-hidden flex flex-col h-full" data-testid="bot-list">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-bold text-primary" data-testid="bot-list-title">Bot Fleet</h2>
+        <div className="flex items-center space-x-3">
+          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                size="sm"
+                className="minecraft-button bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-2"
+                data-testid="button-add-bot"
+              >
+                <Plus className="w-4 h-4" />
+                Add Bot
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="glass-effect">
+              <DialogHeader>
+                <DialogTitle className="text-primary">Create New Bot</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="bot-name">Bot Name</Label>
+                  <div className="flex space-x-2">
+                    <Input
+                      id="bot-name"
+                      value={newBotName}
+                      onChange={(e) => setNewBotName(e.target.value)}
+                      placeholder="Enter bot name..."
+                      className="flex-1"
+                      data-testid="input-bot-name"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={generateRandomName}
+                      className="flex items-center gap-1"
+                      data-testid="button-random-name"
+                    >
+                      <Dice6 className="w-4 h-4" />
+                      Random
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsCreateModalOpen(false)}
+                    data-testid="button-cancel-create"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleCreateBot}
+                    disabled={isCreating || !newBotName.trim()}
+                    className="minecraft-button bg-primary hover:bg-primary/90"
+                    data-testid="button-confirm-create"
+                  >
+                    {isCreating ? 'Creating...' : 'Create Bot'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
           <button 
-            className="text-muted-foreground hover:text-foreground transition-colors"
+            className="text-muted-foreground hover:text-primary transition-colors p-2 rounded-lg hover:bg-secondary/50"
             onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/bots'] })}
             data-testid="button-refresh-bots"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
-          <div className="text-xs bg-muted px-2 py-1 rounded" data-testid="bot-total-count">
+          <div className="text-xs bg-primary/20 text-primary px-3 py-1 rounded-full font-medium" data-testid="bot-total-count">
             {bots.length} Total
           </div>
         </div>
@@ -102,20 +217,20 @@ export function BotList({ bots, selectedBot, onSelectBot }: BotListProps) {
           bots.map((bot) => (
             <div 
               key={bot.id}
-              className={`bot-card bg-secondary/50 hover:bg-secondary border border-border rounded-lg p-3 cursor-pointer transition-all ${
-                selectedBot?.id === bot.id ? 'ring-2 ring-primary' : ''
+              className={`bot-card bg-secondary/50 rounded-xl p-4 cursor-pointer ${
+                selectedBot?.id === bot.id ? 'ring-2 ring-primary shadow-xl shadow-primary/30' : ''
               }`}
               onClick={() => onSelectBot(bot)}
               data-testid={`bot-card-${bot.id}`}
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className={`w-2 h-2 rounded-full ${getStatusColor(bot.status)}`}></div>
+                <div className="flex items-center space-x-4">
+                  <div className={`status-dot ${getStatusColor(bot.status)}`}></div>
                   <div>
-                    <div className="font-medium text-sm" data-testid={`bot-username-${bot.id}`}>
+                    <div className="font-bold text-base text-foreground" data-testid={`bot-username-${bot.id}`}>
                       {bot.username}
                     </div>
-                    <div className="text-xs text-muted-foreground" data-testid={`bot-action-${bot.id}`}>
+                    <div className="text-sm text-muted-foreground font-medium" data-testid={`bot-action-${bot.id}`}>
                       {getActionText(bot.action, bot.target)}
                     </div>
                   </div>
@@ -125,7 +240,7 @@ export function BotList({ bots, selectedBot, onSelectBot }: BotListProps) {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="text-xs bg-green-500/20 text-green-500 hover:bg-green-500/30"
+                      className="minecraft-button text-xs bg-green-500/20 text-green-500 hover:bg-green-500/30 border-green-500"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleBotAction(bot.id, 'connect');
@@ -138,7 +253,7 @@ export function BotList({ bots, selectedBot, onSelectBot }: BotListProps) {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="text-xs bg-primary/20 text-primary hover:bg-primary/30"
+                      className="minecraft-button text-xs bg-primary/20 text-primary hover:bg-primary/30 border-primary"
                       onClick={(e) => e.stopPropagation()}
                       data-testid={`button-control-${bot.id}`}
                     >
@@ -148,15 +263,19 @@ export function BotList({ bots, selectedBot, onSelectBot }: BotListProps) {
                 </div>
               </div>
               
-              <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                <span data-testid={`bot-health-${bot.id}`}>
-                  Health: <span className={bot.health > 0 ? 'text-green-500' : 'text-red-500'}>
+              <div className="mt-3 flex items-center justify-between text-sm">
+                <div className="flex items-center space-x-1">
+                  <span className="text-muted-foreground">Health:</span>
+                  <span className={`font-bold ${bot.health > 0 ? 'text-green-500' : 'text-red-500'}`} data-testid={`bot-health-${bot.id}`}>
                     {bot.health > 0 ? `${bot.health}/${bot.maxHealth}` : '--/--'}
                   </span>
-                </span>
-                <span data-testid={`bot-uptime-${bot.id}`}>
-                  Uptime: <span>{bot.uptime > 0 ? formatUptime(bot.uptime) : '--'}</span>
-                </span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <span className="text-muted-foreground">Uptime:</span>
+                  <span className="font-bold text-primary" data-testid={`bot-uptime-${bot.id}`}>
+                    {bot.uptime > 0 ? formatUptime(bot.uptime) : '--'}
+                  </span>
+                </div>
               </div>
             </div>
           ))

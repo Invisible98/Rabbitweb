@@ -87,6 +87,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create individual bot
+  app.post("/api/bots/create", async (req, res) => {
+    try {
+      if (!req.body.username) {
+        return res.status(400).json({ message: "Username is required" });
+      }
+
+      // Check if bot with this username already exists
+      const existingBot = await storage.getBotByUsername(req.body.username);
+      if (existingBot) {
+        return res.status(400).json({ message: "Bot with this username already exists" });
+      }
+
+      const bot = await botManager.createBot(req.body.username);
+      res.json({ message: `Bot ${req.body.username} created successfully`, bot });
+    } catch (error) {
+      console.error('Error creating bot:', error);
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
   // Get single bot
   app.get("/api/bots/:id", async (req, res) => {
     try {
