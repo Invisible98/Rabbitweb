@@ -31,7 +31,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     setLogs(initialLogs);
-  }, [initialLogs]);
+  }, [initialLogs.length]);
 
   // Socket event handlers
   useEffect(() => {
