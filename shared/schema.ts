@@ -1,74 +1,87 @@
+import { sql } from "drizzle-orm";
+import { pgTable, text, varchar, integer, timestamp, boolean } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export enum BotStatus {
-  OFFLINE = "offline",
-  CONNECTING = "connecting", 
-  ONLINE = "online",
-  RECONNECTING = "reconnecting"
-}
+// User schema
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+});
 
-export enum LogLevel {
-  INFO = "info",
-  SUCCESS = "success", 
-  WARNING = "warning",
-  ERROR = "error"
+export const insertUserSchema = createInsertSchema(users).pick({
+  username: true,
+  password: true,
+});
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+
+// Bot management enums
+export enum BotStatus {
+  ONLINE = 'online',
+  OFFLINE = 'offline', 
+  CONNECTING = 'connecting',
+  RECONNECTING = 'reconnecting'
 }
 
 export enum BotAction {
-  IDLE = "idle",
-  FOLLOWING = "following",
-  ATTACKING = "attacking", 
-  ANTI_AFK = "anti_afk",
-  DISCONNECTED = "disconnected"
+  IDLE = 'idle',
+  FOLLOWING = 'following',
+  ATTACKING = 'attacking',
+  ANTI_AFK = 'anti_afk',
+  DISCONNECTED = 'disconnected'
 }
 
-export const botSchema = z.object({
-  id: z.string(),
-  username: z.string(),
-  status: z.nativeEnum(BotStatus),
-  action: z.nativeEnum(BotAction),
-  health: z.number().default(20),
-  maxHealth: z.number().default(20),
-  uptime: z.number().default(0),
-  lastSeen: z.date(),
-  target: z.string().optional(),
-  isRegistered: z.boolean().default(false),
-  position: z.object({
-    x: z.number(),
-    y: z.number(), 
-    z: z.number()
-  }).optional()
+export enum LogLevel {
+  INFO = 'info',
+  SUCCESS = 'success',
+  WARNING = 'warning',
+  ERROR = 'error'
+}
+
+// Bot interface for in-memory storage
+export interface Bot {
+  id: string;
+  username: string;
+  status: BotStatus;
+  health: number;
+  maxHealth: number;
+  uptime: number;
+  action: BotAction;
+  target?: string;
+  connectedAt?: Date;
+  lastActivity?: Date;
+}
+
+// Log entry interface
+export interface LogEntry {
+  id: string;
+  botName: string;
+  message: string;
+  level: LogLevel;
+  timestamp: Date;
+}
+
+// Chat message interface
+export interface ChatMessage {
+  id: string;
+  content: string;
+  isUser: boolean;
+  timestamp: Date;
+  sender?: string;
+}
+
+// Insert schemas for validation
+export const insertBotSchema = z.object({
+  username: z.string().min(1, 'Username is required'),
 });
 
-export const logEntrySchema = z.object({
-  id: z.string(),
-  botId: z.string(),
-  botName: z.string(),
-  message: z.string(),
-  level: z.nativeEnum(LogLevel),
-  timestamp: z.date()
+export const insertChatMessageSchema = z.object({
+  content: z.string().min(1, 'Message content is required'),
+  isUser: z.boolean().default(true),
 });
 
-export const commandSchema = z.object({
-  type: z.enum(['individual', 'global']),
-  botId: z.string().optional(),
-  command: z.string(),
-  target: z.string().optional()
-});
-
-export const chatMessageSchema = z.object({
-  username: z.string(),
-  message: z.string(),
-  timestamp: z.date()
-});
-
-export type Bot = z.infer<typeof botSchema>;
-export type LogEntry = z.infer<typeof logEntrySchema>;
-export type Command = z.infer<typeof commandSchema>;
-export type ChatMessage = z.infer<typeof chatMessageSchema>;
-
-export const createBotSchema = botSchema.omit({ id: true, lastSeen: true });
-export const createLogEntrySchema = logEntrySchema.omit({ id: true, timestamp: true });
-
-export type CreateBot = z.infer<typeof createBotSchema>;
-export type CreateLogEntry = z.infer<typeof createLogEntrySchema>;
+export type InsertBot = z.infer<typeof insertBotSchema>;
+export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
